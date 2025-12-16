@@ -480,7 +480,14 @@ function renderTable(filteredOutlines = null) {
                     </button>
                     <button class="btn btn-accent btn-small" onclick="deleteOutline(${outline.id})">
                         🗑️ Xóa
-// Mở modal chỉnh sửa
+                    </button>
+                </div>
+            </td>
+        </tr>
+    `).join('');
+}
+
+// Cấu hình Cloudinary (Miễn phí - không cần Firebase Storage)
 function editOutline(id) {
     const outline = outlines.find(o => o.id === id);
     if (!outline) return;
@@ -550,7 +557,24 @@ async function handleEditOutline(e) {
         filePath: filePath,
         fileType: document.getElementById('editFileType').value,
         icon: document.getElementById('editIcon').value
-    };function handleAddOutline(e) {
+    };
+
+    if (firebaseEnabled) {
+        saveToFirebase();
+    } else {
+        saveToLocalStorage();
+    }
+    
+    updateDashboard();
+    renderTable();
+    updateJSONPreview();
+    
+    closeEditModal();
+    showToast('✅ Đã cập nhật đề cương thành công!', 'success');
+}
+
+// Xử lý thêm đề cương
+async function handleAddOutline(e) {
     e.preventDefault();
     
     if (!selectedFile) {
@@ -860,4 +884,5 @@ function importJSON() {
     };
     
     input.click();
+}
 }
