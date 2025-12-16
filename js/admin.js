@@ -390,13 +390,15 @@ function renderTable(filteredOutlines = null) {
 
 // Cấu hình Cloudinary (Miễn phí - không cần Firebase Storage)
 const CLOUDINARY_CLOUD_NAME = 'dydd3mjeo'; // Cloud name của bạn
-const CLOUDINARY_UPLOAD_PRESET = 'decuong_upload'; // Upload preset vừa tạo
+const CLOUDINARY_UPLOAD_PRESET = 'decuong_upload'; // Upload preset đã tạo
 
 // Upload file lên Cloudinary
 async function uploadToCloudinary(file) {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+    formData.append('public_id', file.name.replace(/\.[^/.]+$/, "")); // Giữ tên file gốc
+    formData.append('resource_type', 'auto');
     
     const response = await fetch(
         `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/auto/upload`,
@@ -407,7 +409,9 @@ async function uploadToCloudinary(file) {
     );
     
     if (!response.ok) {
-        throw new Error('Upload failed');
+        const errorData = await response.json();
+        console.error('❌ Cloudinary error:', errorData);
+        throw new Error(errorData.error?.message || 'Upload failed');
     }
     
     const data = await response.json();
