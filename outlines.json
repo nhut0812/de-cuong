@@ -1,0 +1,65 @@
+{
+  "lastUpdate": "2025-12-16",
+  "outlines": [
+    {
+      "id": 1,
+      "subject": "Toán",
+      "grade": "5",
+      "description": "Đề cương ôn tập Toán lớp 5 - Học kỳ 1",
+      "fileName": "De-cuong-Toan-5-HK1.pdf",
+      "filePath": "docs/De-cuong-Toan-5-HK1.pdf",
+      "fileType": "pdf",
+      "icon": "🔢"
+    },
+    {
+      "id": 2,
+      "subject": "Tiếng Việt",
+      "grade": "5",
+      "description": "Đề cương ôn tập Tiếng Việt lớp 5 - Học kỳ 1",
+      "fileName": "De-cuong-Tieng-Viet-5-HK1.pdf",
+      "filePath": "docs/De-cuong-Tieng-Viet-5-HK1.pdf",
+      "fileType": "pdf",
+      "icon": "📖"
+    },
+    {
+      "id": 3,
+      "subject": "Khoa Học",
+      "grade": "5",
+      "description": "Đề cương ôn tập Khoa học lớp 5 - Học kỳ 1",
+      "fileName": "De-cuong-Khoa-hoc-5-HK1.pdf",
+      "filePath": "docs/De-cuong-Khoa-hoc-5-HK1.pdf",
+      "fileType": "pdf",
+      "icon": "🔬"
+    },
+    {
+      "id": 4,
+      "subject": "Tiếng Anh",
+      "grade": "5",
+      "description": "Đề cương ôn tập Tiếng Anh lớp 5 - Học kỳ 1",
+      "fileName": "De-cuong-Tieng-Anh-5-HK1.docx",
+      "filePath": "docs/De-cuong-Tieng-Anh-5-HK1.docx",
+      "fileType": "docx",
+      "icon": "🌍"
+    },
+    {
+      "id": 5,
+      "subject": "Đạo Đức",
+      "grade": "5",
+      "description": "Đề cương ôn tập Đạo đức lớp 5 - Học kỳ 1",
+      "fileName": "De-cuong-Dao-duc-5-HK1.pdf",
+      "filePath": "docs/De-cuong-Dao-duc-5-HK1.pdf",
+      "fileType": "pdf",
+      "icon": "💝"
+    },
+    {
+      "id": 6,
+      "subject": "Lịch Sử & Địa Lý",
+      "grade": "5",
+      "description": "Đề cương ôn tập Lịch sử và Địa lý lớp 5 - Học kỳ 1",
+      "fileName": "De-cuong-LSDL-5-HK1.pdf",
+      "filePath": "docs/De-cuong-LSDL-5-HK1.pdf",
+      "fileType": "pdf",
+      "icon": "🌏"
+    }
+  ]
+}

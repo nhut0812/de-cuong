@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đồng bộ dữ liệu - Admin</title>
+    <link rel="stylesheet" href="css/admin.css">
+    <style>
+        .sync-container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+        .code-block {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 20px 0;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        .highlight {
+            background: #ffd43b;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #000;
+        }
+        .step-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 50%;
+            font-weight: 700;
+            margin-right: 10px;
+        }
+        .step {
+            margin: 25px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        .copy-btn {
+            background: #51cf66;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+        .copy-btn:hover {
+            background: #40c057;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <header class="admin-header">
+            <div class="header-content">
+                <h1>📤 Đồng bộ dữ liệu lên GitHub</h1>
+                <a href="admin.html" class="btn btn-secondary">← Quay lại Admin</a>
+            </div>
+        </header>
+
+        <div class="sync-container">
+            <div class="info-box">
+                <h3>📋 Hướng dẫn đồng bộ dữ liệu</h3>
+                <p>Sau khi chỉnh sửa đề cương trong Admin, làm theo các bước sau để mọi người đều xem được:</p>
+            </div>
+
+            <div class="step">
+                <h3><span class="step-number">1</span>Copy code JavaScript bên dưới</h3>
+                <p>Nhấn nút "📋 Copy Code" để copy toàn bộ code</p>
+            </div>
+
+            <div class="step">
+                <h3><span class="step-number">2</span>Mở file js/app.js</h3>
+                <p>Tìm dòng <code class="highlight">const outlinesData = {</code> (khoảng dòng 6)</p>
+            </div>
+
+            <div class="step">
+                <h3><span class="step-number">3</span>Thay thế dữ liệu</h3>
+                <p>Chọn từ <code>const outlinesData = {</code> đến hết dấu <code>};</code> (khoảng 70 dòng)</p>
+                <p>Paste code đã copy vào</p>
+            </div>
+
+            <div class="step">
+                <h3><span class="step-number">4</span>Lưu và Push lên GitHub</h3>
+                <pre style="background: #1e1e1e; color: #d4d4d4; padding: 15px; border-radius: 6px; margin-top: 10px;">git add js/app.js
+git commit -m "Cập nhật dữ liệu đề cương"
+git push</pre>
+            </div>
+
+            <div style="margin-top: 30px;">
+                <h3>📝 Code để paste vào app.js:</h3>
+                <button class="copy-btn" onclick="copyCode()">📋 Copy Code</button>
+                <pre class="code-block" id="codeBlock">Đang tải dữ liệu...</pre>
+            </div>
+
+            <div class="warning-box" style="margin-top: 30px;">
+                <h4>⚠️ Quan trọng</h4>
+                <ul>
+                    <li>Phải thay thế code trong file <code>js/app.js</code> rồi mới push</li>
+                    <li>Nếu không thay thế, máy khác sẽ không thấy dữ liệu mới</li>
+                    <li>Sau khi push, đợi 1-2 phút để GitHub Pages cập nhật</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script src="js/app.js"></script>
+    <script>
+        // Load dữ liệu từ localStorage
+        function loadDataFromStorage() {
+            try {
+                const savedData = localStorage.getItem('decuong_data');
+                if (savedData) {
+                    const data = JSON.parse(savedData);
+                    generateCode(data);
+                } else if (typeof outlinesData !== 'undefined') {
+                    generateCode(outlinesData);
+                } else {
+                    document.getElementById('codeBlock').textContent = 'Không tìm thấy dữ liệu. Vui lòng thêm đề cương trong Admin trước.';
+                }
+            } catch (error) {
+                console.error('Lỗi:', error);
+                document.getElementById('codeBlock').textContent = 'Lỗi khi tải dữ liệu: ' + error.message;
+            }
+        }
+
+        // Tạo code JavaScript
+        function generateCode(data) {
+            const code = `const outlinesData = ${JSON.stringify(data, null, 2)};`;
+            document.getElementById('codeBlock').textContent = code;
+        }
+
+        // Copy code
+        function copyCode() {
+            const code = document.getElementById('codeBlock').textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                showToast('✅ Đã copy code! Bây giờ paste vào file js/app.js', 'success');
+            }).catch(err => {
+                showToast('❌ Không thể copy: ' + err.message, 'error');
+            });
+        }
+
+        // Toast notification
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type} show`;
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 5000);
+        }
+
+        // Load khi trang được tải
+        window.addEventListener('DOMContentLoaded', loadDataFromStorage);
+    </script>
+</body>
+</html>

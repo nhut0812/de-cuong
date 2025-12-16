@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Đề Cương - Admin</title>
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+    <div class="admin-container">
+        <header class="admin-header">
+            <div class="header-content">
+                <h1>🔐 Quản Lý Đề Cương</h1>
+                <div class="header-actions">
+                    <span id="userEmail" style="margin-right: 15px; color: #fff; font-size: 0.9rem;">Loading...</span>
+                    <button onclick="logout()" class="btn btn-secondary" style="margin-right: 10px;">🚪 Đăng xuất</button>
+                    <a href="index.html" class="btn btn-secondary">👁️ Xem Website</a>
+                </div>
+            </div>
+        </header>
+
+        <div class="admin-content">
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <nav>
+                    <a href="#dashboard" class="nav-item active" data-tab="dashboard">
+                        📊 Tổng quan
+                    </a>
+                    <a href="#add" class="nav-item" data-tab="add">
+                        ➕ Thêm đề cương
+                    </a>
+                    <a href="#manage" class="nav-item" data-tab="manage">
+                        📝 Quản lý đề cương
+                    </a>
+                    <a href="#export" class="nav-item" data-tab="export">
+                        💾 Xuất dữ liệu
+                    </a>
+                </nav>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="main-content">
+                <!-- Dashboard Tab -->
+                <section id="dashboard" class="tab-content active">
+                    <h2>📊 Tổng quan</h2>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon">📚</div>
+                            <div class="stat-info">
+                                <h3 id="totalOutlines">0</h3>
+                                <p>Tổng đề cương</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">📄</div>
+                            <div class="stat-info">
+                                <h3 id="totalPDF">0</h3>
+                                <p>File PDF</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">📃</div>
+                            <div class="stat-info">
+                                <h3 id="totalDOCX">0</h3>
+                                <p>File DOCX</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">📅</div>
+                            <div class="stat-info">
+                                <h3 id="lastUpdateDate">-</h3>
+                                <p>Cập nhật cuối</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="quick-actions">
+                        <h3>Thao tác nhanh</h3>
+                        <div class="action-buttons">
+                            <button class="btn btn-primary" onclick="switchTab('add')">
+                                ➕ Thêm đề cương mới
+                            </button>
+                            <button class="btn btn-secondary" onclick="switchTab('manage')">
+                                📝 Quản lý đề cương
+                            </button>
+                            <button class="btn btn-accent" onclick="switchTab('export')">
+                                💾 Xuất dữ liệu JSON
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Add Outline Tab -->
+                <section id="add" class="tab-content">
+                    <h2>➕ Thêm đề cương mới</h2>
+                    <div class="form-container">
+                        <form id="addOutlineForm">
+                            <div class="form-group">
+                                <label for="fileUpload">Chọn file đề cương *</label>
+                                <div class="file-upload-area" id="fileUploadArea">
+                                    <input type="file" id="fileUpload" name="fileUpload" 
+                                           accept=".pdf,.doc,.docx,.pptx,.txt" required>
+                                    <div class="upload-placeholder">
+                                        <span class="upload-icon">📁</span>
+                                        <p>Kéo thả file vào đây hoặc click để chọn</p>
+                                        <small>Hỗ trợ: PDF, DOC, DOCX, PPTX, TXT</small>
+                                    </div>
+                                    <div class="file-preview" id="filePreview" style="display: none;">
+                                        <span class="file-icon">📄</span>
+                                        <div class="file-details">
+                                            <strong id="previewFileName">-</strong>
+                                            <small id="previewFileInfo">-</small>
+                                        </div>
+                                        <button type="button" class="remove-file-btn" onclick="removeFile()">✕</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="subject">Tên môn học *</label>
+                                <input type="text" id="subject" name="subject" required 
+                                       placeholder="VD: Toán Học, Vật Lý...">
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="grade">Khối/Lớp *</label>
+                                    <select id="grade" name="grade" required>
+                                        <option value="">-- Chọn lớp --</option>
+                                        <option value="1">Lớp 1</option>
+                                        <option value="2">Lớp 2</option>
+                                        <option value="3">Lớp 3</option>
+                                        <option value="4">Lớp 4</option>
+                                        <option value="5">Lớp 5</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="icon">Icon (Emoji)</label>
+                                    <div class="icon-selector">
+                                        <input type="text" id="icon" name="icon" value="📚" maxlength="2">
+                                        <div class="icon-suggestions">
+                                            <button type="button" onclick="setIcon('🔢')">🔢</button>
+                                            <button type="button" onclick="setIcon('📖')">📖</button>
+                                            <button type="button" onclick="setIcon('🔬')">🔬</button>
+                                            <button type="button" onclick="setIcon('🌍')">🌍</button>
+                                            <button type="button" onclick="setIcon('💝')">💝</button>
+                                            <button type="button" onclick="setIcon('🗺️')">🗺️</button>
+                                            <button type="button" onclick="setIcon('🎵')">🎵</button>
+                                            <button type="button" onclick="setIcon('🎨')">🎨</button>
+                                            <button type="button" onclick="setIcon('⚽')">⚽</button>
+                                            <button type="button" onclick="setIcon('🔧')">🔧</button>
+                                            <button type="button" onclick="setIcon('💻')">💻</button>
+                                            <button type="button" onclick="setIcon('🌳')">🌳</button>
+                                            <button type="button" onclick="setIcon('🎯')">🎯</button>
+                                            <button type="button" onclick="setIcon('📚')">📚</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="description">Mô tả *</label>
+                                <textarea id="description" name="description" rows="3" required
+                                          placeholder="VD: Đề cương ôn tập Toán học lớp 12 - Học kỳ 1"></textarea>
+                            </div>
+
+                            <input type="hidden" id="fileName" name="fileName">
+                            <input type="hidden" id="fileType" name="fileType">
+
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary">➕ Thêm đề cương</button>
+                                <button type="reset" class="btn btn-secondary">🔄 Làm mới</button>
+                            </div>
+                        </form>
+                    </div>
+                </section>
+
+                <!-- Manage Outlines Tab -->
+                <section id="manage" class="tab-content">
+                    <h2>📝 Quản lý đề cương</h2>
+                    
+                    <div class="search-section">
+                        <input type="text" id="adminSearch" placeholder="🔍 Tìm kiếm đề cương...">
+                    </div>
+
+                    <div class="table-container">
+                        <table class="outlines-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Icon</th>
+                                    <th>Môn học</th>
+                                    <th>Lớp</th>
+                                    <th>Mô tả</th>
+                                    <th>File</th>
+                                    <th>Loại</th>
+                                    <th>Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody id="outlinesTableBody">
+                                <tr>
+                                    <td colspan="8" class="loading-row">
+                                        <div class="spinner"></div>
+                                        Đang tải dữ liệu...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Export Tab -->
+                <section id="export" class="tab-content">
+                    <h2>💾 Xuất dữ liệu</h2>
+                    
+                    <div class="export-section">
+                        <div class="info-box">
+                            <h3>📋 Hướng dẫn</h3>
+                            <ol>
+                                <li>Nhấn nút "Xuất JSON" để tải file <code>outlines.json</code></li>
+                                <li>File này chứa tất cả dữ liệu đề cương bạn đã chỉnh sửa</li>
+                                <li>Thay thế file <code>outlines.json</code> cũ bằng file mới</li>
+                                <li><strong>Quan trọng:</strong> Copy các file đề cương vào thư mục <code>docs/</code></li>
+                                <li>Commit và push lên GitHub để cập nhật website</li>
+                            </ol>
+                        </div>
+
+                        <div class="json-preview">
+                            <h3>👁️ Xem trước JSON</h3>
+                            <pre id="jsonPreview">{ "loading": true }</pre>
+                        </div>
+
+                        <div class="export-actions">
+                            <button class="btn btn-primary btn-large" onclick="exportJSON()">
+                                💾 Xuất file outlines.json
+                            </button>
+                            <button class="btn btn-secondary" onclick="copyJSON()">
+                                📋 Copy JSON
+                            </button>
+                            <a href="sync.html" class="btn btn-success btn-large">
+                                📤 Hướng dẫn đồng bộ lên GitHub
+                            </a>
+                        </div>
+
+                        <div class="warning-box">
+                            <h4>⚠️ Lưu ý quan trọng</h4>
+                            <ul>
+                                <li><strong>File đề cương chỉ được lưu tạm trong trình duyệt</strong></li>
+                                <li>Bạn phải <strong>tự copy file</strong> vào thư mục <code>docs/</code> trên máy tính</li>
+                                <li>Tên file trong JSON phải khớp với tên file thực tế trong <code>docs/</code></li>
+                                <li>Đường dẫn luôn bắt đầu bằng <code>docs/</code></li>
+                                <li>Sau khi xuất JSON và copy file, nhớ commit và push lên GitHub</li>
+                            </ul>
+                            <div style="margin-top: 15px; padding: 15px; background: white; border-radius: 8px;">
+                                <strong>📝 Lệnh git mẫu:</strong>
+                                <pre style="background: #1e1e1e; color: #d4d4d4; padding: 15px; border-radius: 6px; margin-top: 10px; font-size: 0.85rem;">cp ~/Downloads/De-cuong-moi.pdf docs/
+git add .
+git commit -m "Thêm đề cương mới"
+git push</pre>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>✏️ Chỉnh sửa đề cương</h2>
+                <button class="close-btn" onclick="closeEditModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="editOutlineForm">
+                    <input type="hidden" id="editId">
+                    
+                    <div class="form-group">
+                        <label for="editSubject">Tên môn học *</label>
+                        <input type="text" id="editSubject" required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="editGrade">Khối/Lớp *</label>
+                            <select id="editGrade" required>
+                                <option value="">-- Chọn lớp --</option>
+                                <option value="1">Lớp 1</option>
+                                <option value="2">Lớp 2</option>
+                                <option value="3">Lớp 3</option>
+                                <option value="4">Lớp 4</option>
+                                <option value="5">Lớp 5</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="editIcon">Icon (Emoji)</label>
+                            <input type="text" id="editIcon" maxlength="2">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editDescription">Mô tả *</label>
+                        <textarea id="editDescription" rows="3" required></textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="editFileName">Tên file *</label>
+                            <input type="text" id="editFileName" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="editFileType">Loại file *</label>
+                            <select id="editFileType" required>
+                                <option value="pdf">PDF</option>
+                                <option value="docx">DOCX</option>
+                                <option value="doc">DOC</option>
+                                <option value="pptx">PPTX</option>
+                                <option value="txt">TXT</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">💾 Lưu thay đổi</button>
+                        <button type="button" class="btn btn-secondary" onclick="closeEditModal()">❌ Hủy</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/admin.js"></script>
+</body>
+</html>

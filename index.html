@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đề Cương Ôn Tập</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-top">
+                <div>
+                    <h1>📚 Đề Cương Ôn Tập</h1>
+                    <p class="subtitle">Tải đề cương ôn tập các môn học</p>
+                </div>
+                <a href="#" id="adminBtn" class="admin-btn" title="Trang quản trị">
+                    🔐 Admin
+                </a>
+            </div>
+        </header>
+
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="🔍 Tìm kiếm môn học...">
+        </div>
+
+        <div class="filter-section">
+            <div class="filter-label">Lọc theo lớp:</div>
+            <div class="filter-buttons">
+                <button class="filter-btn active" data-grade="all">Tất cả</button>
+                <button class="filter-btn" data-grade="1">Lớp 1</button>
+                <button class="filter-btn" data-grade="2">Lớp 2</button>
+                <button class="filter-btn" data-grade="3">Lớp 3</button>
+                <button class="filter-btn" data-grade="4">Lớp 4</button>
+                <button class="filter-btn" data-grade="5">Lớp 5</button>
+            </div>
+        </div>
+
+        <div id="stats" class="stats">
+            <span>Tổng số đề cương: <strong id="totalCount">0</strong></span>
+        </div>
+
+        <div id="outlinesList" class="outlines-grid">
+            <!-- Danh sách đề cương sẽ được tải động từ JavaScript -->
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>Đang tải đề cương...</p>
+            </div>
+        </div>
+
+        <footer>
+            <p>Cập nhật: <span id="lastUpdate"></span></p>
+            <p class="note">💡 Nhấp vào tên môn học để tải đề cương về máy</p>
+        </footer>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/app.js"></script>
+    <script>
+        // Xử lý nút Admin - kiểm tra đã đăng nhập chưa
+        document.addEventListener('DOMContentLoaded', function() {
+            const adminBtn = document.getElementById('adminBtn');
+            if (adminBtn) {
+                adminBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Kiểm tra localStorage xem đã đăng nhập chưa
+                    const sessionData = localStorage.getItem('admin_session');
+                    
+                    if (sessionData) {
+                        try {
+                            const session = JSON.parse(sessionData);
+                            
+                            // Kiểm tra thời gian hết hạn
+                            if (session.expires && Date.now() < session.expires && session.logged_in) {
+                                // Đã đăng nhập và còn hiệu lực, chuyển thẳng đến admin
+                                window.location.href = 'admin.html';
+                                return;
+                            }
+                        } catch (e) {
+                            console.error('Lỗi đọc session:', e);
+                        }
+                    }
+                    
+                    // Chưa đăng nhập hoặc hết hạn, chuyển đến login
+                    window.location.href = 'login.html';
+                });
+            }
+        });
+    </script>
+</body>
+</html>

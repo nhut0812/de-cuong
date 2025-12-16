@@ -1,0 +1,315 @@
+// Biến toàn cục
+let allOutlines = [];
+let currentFilter = 'all';
+
+// Dữ liệu đề cương (nhúng trực tiếp)
+const outlinesData = {
+  "lastUpdate": "2025-12-16",
+  "outlines": [
+    {
+      "id": 1,
+      "subject": "Toán",
+      "grade": "5",
+      "description": "Đề cương ôn tập Toán lớp 5 - Học kỳ 1",
+      "fileName": "De-cuong-Toan-5-HK1.pdf",
+      "filePath": "docs/De-cuong-Toan-5-HK1.pdf",
+      "fileType": "pdf",
+      "icon": "🔢"
+    },
+    {
+      "id": 2,
+      "subject": "Tiếng Việt",
+      "grade": "5",
+      "description": "Đề cương ôn tập Tiếng Việt lớp 5 - Học kỳ 1",
+      "fileName": "De-cuong-Tieng-Viet-5-HK1.pdf",
+      "filePath": "docs/De-cuong-Tieng-Viet-5-HK1.pdf",
+      "fileType": "pdf",
+      "icon": "📖"
+    },
+    {
+      "id": 3,
+      "subject": "Khoa Học",
+      "grade": "5",
+      "description": "Đề cương ôn tập Khoa học lớp 5 - Học kỳ 1",
+      "fileName": "De-cuong-Khoa-hoc-5-HK1.pdf",
+      "filePath": "docs/De-cuong-Khoa-hoc-5-HK1.pdf",
+      "fileType": "pdf",
+      "icon": "🔬"
+    },
+    {
+      "id": 4,
+      "subject": "Tiếng Anh",
+      "grade": "5",
+      "description": "Đề cương ôn tập Tiếng Anh lớp 5 - Học kỳ 1",
+      "fileName": "De-cuong-Tieng-Anh-5-HK1.docx",
+      "filePath": "docs/De-cuong-Tieng-Anh-5-HK1.docx",
+      "fileType": "docx",
+      "icon": "🌍"
+    },
+    {
+      "id": 5,
+      "subject": "Đạo Đức",
+      "grade": "5",
+      "description": "Đề cương ôn tập Đạo đức lớp 5 - Học kỳ 1",
+      "fileName": "De-cuong-Dao-duc-5-HK1.pdf",
+      "filePath": "docs/De-cuong-Dao-duc-5-HK1.pdf",
+      "fileType": "pdf",
+      "icon": "💝"
+    },
+    {
+      "id": 6,
+      "subject": "Lịch Sử & Địa Lý",
+      "grade": "5",
+      "description": "Đề cương ôn tập Lịch sử và Địa lý lớp 5 - Học kỳ 1",
+      "fileName": "De-cuong-LSDL-5-HK1.pdf",
+      "filePath": "docs/De-cuong-LSDL-5-HK1.pdf",
+      "fileType": "pdf",
+      "icon": "🌏"
+    }
+  ]
+};
+
+// Hàm tải dữ liệu đề cương
+function loadOutlines() {
+    // Nếu có Firebase, load từ Firebase
+    if (typeof useFirebase !== 'undefined' && useFirebase && database) {
+        loadFromFirebase();
+    } else {
+        // Không có Firebase, dùng dữ liệu local
+        loadFromLocal();
+    }
+}
+
+// Load từ Firebase (tự động đồng bộ)
+function loadFromFirebase() {
+    const outlinesRef = database.ref('outlines');
+    
+    outlinesRef.on('value', (snapshot) => {
+        const data = snapshot.val();
+        if (data && data.items && data.items.length > 0) {
+            allOutlines = data.items;
+            
+            // Cập nhật ngày
+            const lastUpdateElement = document.getElementById('lastUpdate');
+            if (lastUpdateElement) {
+                lastUpdateElement.textContent = formatDate(data.lastUpdate || new Date().toISOString().split('T')[0]);
+            }
+            
+            displayOutlines(allOutlines);
+            console.log('✅ Đã tải dữ liệu từ Firebase');
+        } else {
+            // Firebase trống, khởi tạo dữ liệu mặc định
+            console.log('📝 Firebase trống, đang khởi tạo dữ liệu mẫu...');
+            const initialData = {
+                lastUpdate: outlinesData.lastUpdate,
+                items: outlinesData.outlines
+            };
+            outlinesRef.set(initialData).then(() => {
+                console.log('✅ Đã khởi tạo dữ liệu mẫu vào Firebase');
+                allOutlines = outlinesData.outlines;
+                displayOutlines(allOutlines);
+            }).catch((error) => {
+                console.error('❌ Lỗi khởi tạo Firebase:', error);
+                loadFromLocal();
+            });
+        }
+    }, (error) => {
+        console.error('❌ Lỗi Firebase:', error);
+        loadFromLocal();
+    });
+}
+
+// Load từ dữ liệu local
+function loadFromLocal() {
+    try {
+        allOutlines = outlinesData.outlines;
+        
+        // Cập nhật ngày cập nhật
+        const lastUpdateElement = document.getElementById('lastUpdate');
+        if (lastUpdateElement) {
+            lastUpdateElement.textContent = formatDate(outlinesData.lastUpdate);
+        }
+        
+        displayOutlines(allOutlines);
+    } catch (error) {
+        console.error('Lỗi:', error);
+        displayError();
+    }
+}
+
+// Hàm hiển thị danh sách đề cương
+function displayOutlines(outlines) {
+    const container = document.getElementById('outlinesList');
+    const totalCountElement = document.getElementById('totalCount');
+    
+    if (!container) return;
+    
+    // Cập nhật số lượng
+    if (totalCountElement) {
+        totalCountElement.textContent = outlines.length;
+    }
+    
+    // Nếu không có đề cương
+    if (outlines.length === 0) {
+        container.innerHTML = `
+            <div class="no-results">
+                <p>Không tìm thấy đề cương nào!</p>
+            </div>
+        `;
+        return;
+    }
+    
+    // Tạo HTML cho các card
+    const cardsHTML = outlines.map(outline => createOutlineCard(outline)).join('');
+    container.innerHTML = cardsHTML;
+    
+    // Thêm sự kiện click cho các card
+    addCardClickEvents();
+}
+// Hàm tạo HTML cho một card đề cương
+function createOutlineCard(outline) {
+    const gradeTag = outline.grade ? `<span class="grade-tag">Lớp ${outline.grade}</span>` : '';
+    
+    return `
+        <div class="outline-card" data-id="${outline.id}" data-file="${outline.filePath}" data-grade="${outline.grade || ''}">
+            <h3>
+                <span class="subject-icon">${outline.icon}</span>
+                ${outline.subject}
+                ${gradeTag}
+            </h3>
+            <p class="description">${outline.description}</p>
+            <div class="file-info">
+                <span class="file-type ${outline.fileType}">${outline.fileType.toUpperCase()}</span>
+                <span>${outline.fileName}</span>
+            </div>
+            <a href="${outline.filePath}" 
+               class="download-btn" 
+               download="${outline.fileName}"
+               onclick="event.stopPropagation()">
+                📥 Tải xuống
+            </a>
+        </div>
+    `;
+}   `;
+}
+
+// Hàm thêm sự kiện click cho các card
+function addCardClickEvents() {
+    const cards = document.querySelectorAll('.outline-card');
+    cards.forEach(card => {
+        card.addEventListener('click', function(e) {
+            // Nếu click vào button download thì không làm gì
+            if (e.target.classList.contains('download-btn')) {
+                return;
+            }
+            
+            // Lấy đường dẫn file và tải xuống
+            const filePath = this.getAttribute('data-file');
+            const fileName = this.querySelector('.file-info span:last-child').textContent;
+            downloadFile(filePath, fileName);
+        });
+    });
+}
+
+// Hàm tải file
+function downloadFile(filePath, fileName) {
+    const link = document.createElement('a');
+    link.href = filePath;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+// Hàm tìm kiếm
+function searchOutlines(searchTerm) {
+    let filtered = allOutlines;
+    
+    // Lọc theo khối/lớp
+    if (currentFilter !== 'all') {
+        filtered = filtered.filter(outline => outline.grade === currentFilter);
+    }
+    
+    // Lọc theo từ khóa tìm kiếm
+    if (searchTerm) {
+        const searchString = searchTerm.toLowerCase().trim();
+        filtered = filtered.filter(outline => {
+            return (
+                outline.subject.toLowerCase().includes(searchString) ||
+                outline.description.toLowerCase().includes(searchString) ||
+                outline.fileName.toLowerCase().includes(searchString)
+            );
+        });
+    }
+    
+    displayOutlines(filtered);
+}
+
+// Hàm lọc theo khối/lớp
+function filterByGrade(grade) {
+    currentFilter = grade;
+    
+    // Update active button
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.getAttribute('data-grade') === grade) {
+            btn.classList.add('active');
+        }
+    });
+    
+    // Apply filter
+    const searchTerm = document.getElementById('searchInput').value;
+    searchOutlines(searchTerm);
+}   });
+    
+    displayOutlines(filtered);
+    // Thêm sự kiện tìm kiếm
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        // Tìm kiếm khi gõ (debounce để tối ưu hiệu năng)
+        let debounceTimer;
+        searchInput.addEventListener('input', function(e) {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                searchOutlines(e.target.value);
+            }, 300);
+        });
+    }
+    
+    // Thêm sự kiện cho filter buttons
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const grade = this.getAttribute('data-grade');
+            filterByGrade(grade);
+        });
+    });
+}); if (container) {
+        container.innerHTML = `
+            <div class="no-results">
+                <p style="color: #e74c3c;">❌ Đã xảy ra lỗi khi tải đề cương!</p>
+                <p style="font-size: 0.9rem; margin-top: 10px;">Vui lòng thử lại sau hoặc liên hệ quản trị viên.</p>
+            </div>
+        `;
+    }
+}
+
+// Khởi tạo khi trang được tải
+document.addEventListener('DOMContentLoaded', function() {
+    // Tải danh sách đề cương
+    loadOutlines();
+    
+    // Thêm sự kiện tìm kiếm
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        // Tìm kiếm khi gõ (debounce để tối ưu hiệu năng)
+        let debounceTimer;
+        searchInput.addEventListener('input', function(e) {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                searchOutlines(e.target.value);
+            }, 300);
+        });
+    }
+});
+
+// Hàm làm mới danh sách (có thể dùng khi cần)
+function refreshOutlines() {
+    loadOutlines();
+}
