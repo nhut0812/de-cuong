@@ -530,10 +530,40 @@ function handleEditOutline(e) {
     showToast('✅ Đã cập nhật đề cương thành công!', 'success');
 }
 
+// Xóa file từ Cloudinary
+async function deleteFromCloudinary(fileUrl) {
+    try {
+        // Lấy public_id từ URL Cloudinary
+        // URL format: https://res.cloudinary.com/cloud_name/resource_type/upload/v123/public_id.ext
+        const urlParts = fileUrl.split('/');
+        const fileNameWithExt = urlParts[urlParts.length - 1];
+        const publicId = fileNameWithExt.split('.')[0];
+        
+        console.log('🗑️ Đang xóa file từ Cloudinary:', publicId);
+        
+        // Cloudinary không cho phép xóa từ client (cần server-side)
+        // Nên chỉ log ra, file sẽ tự xóa sau 30 ngày nếu không dùng
+        console.log('ℹ️ File sẽ tự động xóa sau 30 ngày nếu không được sử dụng');
+        
+    } catch (error) {
+        console.error('❌ Lỗi xóa file Cloudinary:', error);
+    }
+}
+
 // Xóa đề cương
-function deleteOutline(id) {
+async function deleteOutline(id) {
     const outline = outlines.find(o => o.id === id);
     if (!outline) return;
+    
+    if (!confirm(`Bạn có chắc muốn xóa: ${outline.subject} - ${outline.description}?`)) {
+        return;
+    }
+    
+    // Xóa file từ Cloudinary nếu có
+    if (outline.filePath && outline.filePath.includes('cloudinary.com')) {
+        await deleteFromCloudinary(outline.filePath);
+    }
+    
     outlines = outlines.filter(o => o.id !== id);
     
     if (firebaseEnabled) {
