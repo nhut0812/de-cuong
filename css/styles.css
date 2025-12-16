@@ -338,51 +338,139 @@ footer p {
 /* Responsive Design */
 @media (max-width: 768px) {
     body {
-        padding: 10px;
+        padding: 5px;
+    }
+
+    .container {
+        border-radius: 15px;
     }
 
     header {
-        padding: 30px 20px;
+        padding: 25px 15px;
     }
 
     .header-top {
         flex-direction: column;
         text-align: center;
-    }
-
-    header h1 {
-        font-size: 1.8rem;
-    }
-
-    .subtitle {
-        font-size: 0.95rem;
-    }
-
-    .outlines-grid {
-        grid-template-columns: 1fr;
-        padding: 20px;
         gap: 15px;
-    }
-
-    .outline-card {
-        padding: 20px;
-    }
-
-    .search-box {
-        padding: 20px;
-    }
-}
-
-@media (max-width: 480px) {
-    header {
-        padding: 30px 20px;
     }
 
     header h1 {
         font-size: 1.5rem;
     }
 
+    .subtitle {
+        font-size: 0.9rem;
+    }
+
+    .admin-btn {
+        padding: 10px 20px;
+        font-size: 0.9rem;
+    }
+
+    .search-box {
+        padding: 15px;
+    }
+
+    .search-box input {
+        font-size: 14px;
+        padding: 12px 15px;
+    }
+
+    .filter-section {
+        padding: 15px;
+    }
+
+    .filter-buttons {
+        gap: 8px;
+        overflow-x: auto;
+        padding-bottom: 5px;
+    }
+
+    .filter-btn {
+        padding: 8px 15px;
+        font-size: 0.85rem;
+        white-space: nowrap;
+    }
+
+    .stats {
+        padding: 12px 15px;
+        font-size: 0.9rem;
+    }
+
+    .outlines-grid {
+        grid-template-columns: 1fr;
+        padding: 15px;
+        gap: 15px;
+    }
+
+    .outline-card {
+        padding: 18px;
+    }
+
     .outline-card h3 {
         font-size: 1.1rem;
+    }
+
+    .outline-card .description {
+        font-size: 0.9rem;
+    }
+
+    .file-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .download-btn {
+        width: 100%;
+        text-align: center;
+        padding: 12px;
+    }
+
+    footer {
+        padding: 20px 15px;
+        font-size: 0.85rem;
+    }
+}
+
+@media (max-width: 480px) {
+    body {
+        padding: 0;
+    }
+
+    .container {
+        border-radius: 0;
+    }
+
+    header {
+        padding: 20px 15px;
+        border-radius: 0;
+    }
+
+    header h1 {
+        font-size: 1.3rem;
+    }
+
+    .subtitle {
+        font-size: 0.85rem;
+    }
+
+    .outline-card h3 {
+        font-size: 1rem;
+    }
+
+    .subject-icon {
+        font-size: 1.3rem;
+    }
+
+    .grade-tag {
+        font-size: 0.7rem;
+        padding: 3px 8px;
+    }
+
+    .filter-btn {
+        font-size: 0.8rem;
+        padding: 6px 12px;
     }
 }

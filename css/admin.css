@@ -761,12 +761,14 @@ body {
     .sidebar nav {
         flex-direction: row;
         overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
     }
 
     .nav-item {
         border-left: none;
         border-bottom: 3px solid transparent;
         white-space: nowrap;
+        min-width: fit-content;
     }
 
     .nav-item.active {
@@ -776,26 +778,60 @@ body {
 }
 
 @media (max-width: 768px) {
+    .admin-header {
+        padding: 15px;
+    }
+
     .header-content {
         flex-direction: column;
-        gap: 15px;
+        gap: 12px;
         text-align: center;
     }
 
+    .header-content h1 {
+        font-size: 1.3rem;
+    }
+
+    .header-actions {
+        flex-direction: column;
+        width: 100%;
+        gap: 10px;
+    }
+
+    .header-actions .btn {
+        width: 100%;
+        justify-content: center;
+    }
+
     .main-content {
-        padding: 20px;
+        padding: 15px;
     }
 
     .stats-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+
+    .stat-card {
+        padding: 15px;
+    }
+
+    .stat-icon {
+        font-size: 2rem;
+    }
+
+    .stat-info h3 {
+        font-size: 1.5rem;
     }
 
     .form-row {
         grid-template-columns: 1fr;
     }
 
-    .action-buttons {
+    .action-buttons,
+    .quick-actions .action-buttons {
         flex-direction: column;
+        gap: 10px;
     }
 
     .btn {
@@ -807,12 +843,81 @@ body {
         flex-direction: column;
     }
 
+    /* Table responsive */
+    .table-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
     .outlines-table {
-        font-size: 0.85rem;
+        font-size: 0.8rem;
+        min-width: 700px;
     }
 
     .outlines-table th,
     .outlines-table td {
-        padding: 10px 8px;
+        padding: 8px 6px;
+    }
+
+    /* Icon selector */
+    .icon-suggestions {
+        grid-template-columns: repeat(5, 1fr);
+    }
+
+    /* File upload */
+    .file-upload-area {
+        padding: 30px 15px;
+    }
+
+    /* Modal */
+    .modal {
+        padding: 15px;
+    }
+
+    .modal-content {
+        width: 95%;
+        max-width: none;
+        margin: 20px auto;
+    }
+
+    .modal-header,
+    .modal-footer {
+        padding: 15px;
+    }
+
+    .modal-body {
+        padding: 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    .admin-header {
+        padding: 12px;
+    }
+
+    .header-content h1 {
+        font-size: 1.1rem;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .nav-item {
+        font-size: 0.85rem;
+        padding: 12px 15px;
+    }
+
+    .icon-suggestions {
+        grid-template-columns: repeat(4, 1fr);
+    }
+
+    .btn {
+        font-size: 0.85rem;
+        padding: 10px 15px;
+    }
+
+    .outlines-table {
+        font-size: 0.75rem;
     }
 }
