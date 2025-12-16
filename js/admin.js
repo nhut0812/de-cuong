@@ -3,7 +3,6 @@ let outlines = [];
 let originalData = {};
 let currentEditId = null;
 let selectedFile = null;
-let selectedEditFile = null; // File cho chức năng sửa
 let firebaseEnabled = false;
 let currentUser = null;
 
@@ -85,9 +84,6 @@ function setupEventListeners() {
 
     // Search
     document.getElementById('adminSearch').addEventListener('input', handleSearch);
-    
-    // Edit file upload
-    setupEditFileUpload();
 }
 
 // Setup file upload với drag & drop
@@ -175,6 +171,9 @@ function handleFile(file) {
     if (!document.getElementById('description').value) {
         const baseName = fileName.replace(/\.[^/.]+$/, ""); // Bỏ extension
         document.getElementById('description').value = `Đề cương - ${baseName}`;
+    }
+}
+
 // Xóa file đã chọn
 function removeFile() {
     selectedFile = null;
@@ -182,104 +181,6 @@ function removeFile() {
     document.getElementById('fileName').value = '';
     document.getElementById('fileType').value = '';
     
-    document.querySelector('.upload-placeholder').style.display = 'block';
-    document.getElementById('filePreview').style.display = 'none';
-}
-
-// Setup file upload cho modal Edit
-function setupEditFileUpload() {
-    const fileInput = document.getElementById('editFileUpload');
-    const uploadArea = document.getElementById('editFileUploadArea');
-
-    if (!fileInput || !uploadArea) return;
-
-    // Click to upload
-    fileInput.addEventListener('change', handleEditFileSelect);
-
-    // Drag & drop
-    uploadArea.addEventListener('dragover', function(e) {
-        e.preventDefault();
-        uploadArea.classList.add('drag-over');
-    });
-
-    uploadArea.addEventListener('dragleave', function(e) {
-        e.preventDefault();
-        uploadArea.classList.remove('drag-over');
-    });
-
-    uploadArea.addEventListener('drop', function(e) {
-        e.preventDefault();
-        uploadArea.classList.remove('drag-over');
-        
-        const files = e.dataTransfer.files;
-        if (files.length > 0) {
-            handleEditFile(files[0]);
-        }
-    });
-}
-
-// Xử lý khi chọn file trong Edit modal
-function handleEditFileSelect(e) {
-    const file = e.target.files[0];
-    if (file) {
-        handleEditFile(file);
-    }
-}
-
-// Xử lý file Edit
-function handleEditFile(file) {
-    // Kiểm tra loại file
-    const allowedTypes = ['application/pdf', 'application/msword', 
-                         'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-                         'application/vnd.ms-powerpoint',
-                         'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-                         'text/plain'];
-    
-    if (!allowedTypes.includes(file.type) && !file.name.match(/\.(pdf|doc|docx|pptx|txt)$/i)) {
-        showToast('❌ Chỉ hỗ trợ file PDF, DOC, DOCX, PPTX, TXT', 'error');
-        return;
-    }
-
-    selectedEditFile = file;
-    
-    // Lấy tên file và loại file
-    const fileName = file.name;
-    const fileExtension = fileName.split('.').pop().toLowerCase();
-    const fileSize = (file.size / 1024).toFixed(2); // KB
-
-    // Cập nhật fields
-    document.getElementById('editFileName').value = fileName;
-    document.getElementById('editFileType').value = fileExtension;
-
-    // Hiển thị preview
-    const uploadArea = document.getElementById('editFileUploadArea');
-    uploadArea.querySelector('.upload-placeholder').style.display = 'none';
-    const preview = document.getElementById('editFilePreview');
-    preview.style.display = 'flex';
-    
-    // Icon theo loại file
-    const fileIcons = {
-        'pdf': '📕',
-        'doc': '📘',
-        'docx': '📘',
-        'pptx': '📙',
-        'txt': '📄'
-    };
-    
-    preview.querySelector('.file-icon').textContent = fileIcons[fileExtension] || '📄';
-    document.getElementById('editPreviewFileName').textContent = fileName;
-    document.getElementById('editPreviewFileInfo').textContent = `${fileSize} KB • ${fileExtension.toUpperCase()}`;
-}
-
-// Xóa file đã chọn trong Edit modal
-function removeEditFile() {
-    selectedEditFile = null;
-    document.getElementById('editFileUpload').value = '';
-    
-    const uploadArea = document.getElementById('editFileUploadArea');
-    uploadArea.querySelector('.upload-placeholder').style.display = 'block';
-    document.getElementById('editFilePreview').style.display = 'none';
-}   
     document.querySelector('.upload-placeholder').style.display = 'block';
     document.getElementById('filePreview').style.display = 'none';
 }
@@ -488,89 +389,33 @@ function renderTable(filteredOutlines = null) {
 }
 
 // Cấu hình Cloudinary (Miễn phí - không cần Firebase Storage)
-function editOutline(id) {
-    const outline = outlines.find(o => o.id === id);
-    if (!outline) return;
+const CLOUDINARY_CLOUD_NAME = 'dydd3mjeo'; // Cloud name của bạn
+const CLOUDINARY_UPLOAD_PRESET = 'decuong_upload'; // Upload preset đã tạo
 
-    currentEditId = id;
-    selectedEditFile = null; // Reset file mới
+// Upload file lên Cloudinary
+async function uploadToCloudinary(file) {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+    formData.append('public_id', file.name.replace(/\.[^/.]+$/, "")); // Giữ tên file gốc
+    formData.append('resource_type', 'auto');
     
-    document.getElementById('editId').value = outline.id;
-    document.getElementById('editSubject').value = outline.subject;
-    document.getElementById('editGrade').value = outline.grade || '';
-    document.getElementById('editDescription').value = outline.description;
-    document.getElementById('editFileName').value = outline.fileName;
-    document.getElementById('editFileType').value = outline.fileType;
-    document.getElementById('editIcon').value = outline.icon;
-    document.getElementById('editFilePath').value = outline.filePath;
-    
-    // Reset file upload preview
-    const uploadArea = document.getElementById('editFileUploadArea');
-    if (uploadArea) {
-        uploadArea.querySelector('.upload-placeholder').style.display = 'block';
-        document.getElementById('editFilePreview').style.display = 'none';
-    }
-
-    openEditModal();
-}
-
-// Xử lý cập nhật đề cương
-async function handleEditOutline(e) {
-    e.preventDefault();
-    
-    const id = parseInt(document.getElementById('editId').value);
-    const index = outlines.findIndex(o => o.id === id);
-    
-    if (index === -1) return;
-
-    const fileName = document.getElementById('editFileName').value;
-    let filePath = document.getElementById('editFilePath').value; // Giữ nguyên path cũ
-    
-    // Nếu có upload file mới
-    if (selectedEditFile) {
-        showToast('📤 Đang upload file mới lên Cloudinary...', 'info');
-        
-        try {
-            // Upload file mới lên Cloudinary
-            filePath = await uploadToCloudinary(selectedEditFile);
-            console.log('✅ Đã upload file mới lên Cloudinary:', filePath);
-            
-            // TODO: Xóa file cũ trên Cloudinary nếu có
-            const oldFilePath = outlines[index].filePath;
-            if (oldFilePath && oldFilePath.includes('cloudinary.com')) {
-                await deleteFromCloudinary(oldFilePath);
-            }
-            
-        } catch (error) {
-            console.error('❌ Lỗi upload file:', error);
-            showToast('❌ Lỗi upload file: ' + error.message, 'error');
-            return;
+    const response = await fetch(
+        `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/auto/upload`,
+        {
+            method: 'POST',
+            body: formData
         }
+    );
+    
+    if (!response.ok) {
+        const errorData = await response.json();
+        console.error('❌ Cloudinary error:', errorData);
+        throw new Error(errorData.error?.message || 'Upload failed');
     }
     
-    outlines[index] = {
-        id: id,
-        subject: document.getElementById('editSubject').value,
-        grade: document.getElementById('editGrade').value,
-        description: document.getElementById('editDescription').value,
-        fileName: fileName,
-        filePath: filePath,
-        fileType: document.getElementById('editFileType').value,
-        icon: document.getElementById('editIcon').value
-    };
-
-    if (firebaseEnabled) {
-        saveToFirebase();
-    } else {
-        saveToLocalStorage();
-    }
-    
-    updateDashboard();
-    renderTable();
-    updateJSONPreview();
-    
-    closeEditModal();
-    showToast('✅ Đã cập nhật đề cương thành công!', 'success');
+    const data = await response.json();
+    return data.secure_url;
 }
 
 // Xử lý thêm đề cương
@@ -685,40 +530,10 @@ function handleEditOutline(e) {
     showToast('✅ Đã cập nhật đề cương thành công!', 'success');
 }
 
-// Xóa file từ Cloudinary
-async function deleteFromCloudinary(fileUrl) {
-    try {
-        // Lấy public_id từ URL Cloudinary
-        // URL format: https://res.cloudinary.com/cloud_name/resource_type/upload/v123/public_id.ext
-        const urlParts = fileUrl.split('/');
-        const fileNameWithExt = urlParts[urlParts.length - 1];
-        const publicId = fileNameWithExt.split('.')[0];
-        
-        console.log('🗑️ Đang xóa file từ Cloudinary:', publicId);
-        
-        // Cloudinary không cho phép xóa từ client (cần server-side)
-        // Nên chỉ log ra, file sẽ tự xóa sau 30 ngày nếu không dùng
-        console.log('ℹ️ File sẽ tự động xóa sau 30 ngày nếu không được sử dụng');
-        
-    } catch (error) {
-        console.error('❌ Lỗi xóa file Cloudinary:', error);
-    }
-}
-
 // Xóa đề cương
-async function deleteOutline(id) {
+function deleteOutline(id) {
     const outline = outlines.find(o => o.id === id);
     if (!outline) return;
-    
-    if (!confirm(`Bạn có chắc muốn xóa: ${outline.subject} - ${outline.description}?`)) {
-        return;
-    }
-    
-    // Xóa file từ Cloudinary nếu có
-    if (outline.filePath && outline.filePath.includes('cloudinary.com')) {
-        await deleteFromCloudinary(outline.filePath);
-    }
-    
     outlines = outlines.filter(o => o.id !== id);
     
     if (firebaseEnabled) {
@@ -884,5 +699,4 @@ function importJSON() {
     };
     
     input.click();
-}
 }
