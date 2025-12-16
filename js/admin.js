@@ -389,7 +389,7 @@ function renderTable(filteredOutlines = null) {
 }
 
 // Xử lý thêm đề cương
-function handleAddOutline(e) {
+async function handleAddOutline(e) {
     e.preventDefault();
     
     if (!selectedFile) {
@@ -400,34 +400,57 @@ function handleAddOutline(e) {
     const formData = new FormData(e.target);
     const fileName = formData.get('fileName');
     
-    const newOutline = {
-        id: outlines.length > 0 ? Math.max(...outlines.map(o => o.id)) + 1 : 1,
-        subject: formData.get('subject'),
-        grade: formData.get('grade'),
-        description: formData.get('description'),
-        fileName: fileName,
-        filePath: `docs/${fileName}`,
-        fileType: formData.get('fileType'),
-        icon: formData.get('icon') || '📚'
-    };
+    showToast('📤 Đang upload file...', 'info');
+    
+    try {
+        let filePath = `docs/${fileName}`;
+        
+        // Upload file lên Firebase Storage nếu có
+        if (typeof storage !== 'undefined' && storage) {
+            const storageRef = storage.ref();
+            const fileRef = storageRef.child(`outlines/${fileName}`);
+            
+            // Upload file
+            await fileRef.put(selectedFile);
+            
+            // Lấy download URL
+            filePath = await fileRef.getDownloadURL();
+            
+            console.log('✅ Đã upload file lên Firebase Storage:', filePath);
+        }
+        
+        const newOutline = {
+            id: outlines.length > 0 ? Math.max(...outlines.map(o => o.id)) + 1 : 1,
+            subject: formData.get('subject'),
+            grade: formData.get('grade'),
+            description: formData.get('description'),
+            fileName: fileName,
+            filePath: filePath,
+            fileType: formData.get('fileType'),
+            icon: formData.get('icon') || '📚'
+        };
 
-    outlines.push(newOutline);
-    
-    if (firebaseEnabled) {
-        saveToFirebase();
-    } else {
-        saveToLocalStorage();
+        outlines.push(newOutline);
+        
+        if (firebaseEnabled) {
+            saveToFirebase();
+        } else {
+            saveToLocalStorage();
+        }
+        
+        updateDashboard();
+        renderTable();
+        updateJSONPreview();
+        
+        // Reset form và file
+        e.target.reset();
+        removeFile();
+        
+        showToast('✅ Đã thêm đề cương và upload file thành công!', 'success');
+    } catch (error) {
+        console.error('❌ Lỗi upload file:', error);
+        showToast('❌ Lỗi upload file: ' + error.message, 'error');
     }
-    
-    updateDashboard();
-    renderTable();
-    updateJSONPreview();
-    
-    // Reset form và file
-    e.target.reset();
-    removeFile();
-    
-    showToast('✅ Đã thêm đề cương thành công!', 'success');
     showToast('📌 Nhớ copy file vào thư mục docs/ trước khi push!', 'success');
     
     // Chuyển sang tab quản lý
