@@ -306,10 +306,33 @@ git push</pre>
                         <textarea id="editDescription" rows="3" required></textarea>
                     </div>
 
+                    <!-- Upload file mới (tùy chọn) -->
+                    <div class="form-group">
+                        <label>📎 Thay đổi file (tùy chọn)</label>
+                        <div class="file-upload-area" id="editFileUploadArea">
+                            <input type="file" id="editFileUpload" accept=".pdf,.doc,.docx,.pptx,.txt" style="display: none;">
+                            <div class="upload-placeholder" onclick="document.getElementById('editFileUpload').click()">
+                                <div class="upload-icon">📎</div>
+                                <p>Click hoặc kéo thả file vào đây</p>
+                                <small>Hỗ trợ: PDF, DOC, DOCX, PPTX, TXT (Tối đa 10MB)</small>
+                            </div>
+                            <div id="editFilePreview" class="file-preview" style="display: none;">
+                                <div class="file-icon">📄</div>
+                                <div class="file-details">
+                                    <div class="file-name" id="editPreviewFileName">File.pdf</div>
+                                    <div class="file-info" id="editPreviewFileInfo">1.5 MB • PDF</div>
+                                </div>
+                                <button type="button" class="remove-file-btn" onclick="removeEditFile()">
+                                    ✕
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="form-row">
                         <div class="form-group">
                             <label for="editFileName">Tên file *</label>
-                            <input type="text" id="editFileName" required>
+                            <input type="text" id="editFileName" required readonly style="background: #f5f5f5;">
                         </div>
 
                         <div class="form-group">
@@ -323,6 +346,8 @@ git push</pre>
                             </select>
                         </div>
                     </div>
+
+                    <input type="hidden" id="editFilePath">
 
                     <div class="form-actions">
                         <button type="submit" class="btn btn-primary">💾 Lưu thay đổi</button>
