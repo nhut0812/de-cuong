@@ -58,7 +58,7 @@ const firebaseConfig = {
 };
 
 // Khởi tạo Firebase
-let app, database, storage;
+let app, database;
 let useFirebase = false;
 
 try {
@@ -66,7 +66,6 @@ try {
   if (firebaseConfig.apiKey !== "YOUR_API_KEY_HERE") {
     app = firebase.initializeApp(firebaseConfig);
     database = firebase.database();
-    storage = firebase.storage();
     useFirebase = true;
     console.log('✅ Firebase đã kết nối thành công!');
     

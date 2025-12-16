@@ -388,6 +388,32 @@ function renderTable(filteredOutlines = null) {
     `).join('');
 }
 
+// Cấu hình Cloudinary (Miễn phí - không cần Firebase Storage)
+const CLOUDINARY_CLOUD_NAME = 'dydd3mjeo'; // Cloud name của bạn
+const CLOUDINARY_UPLOAD_PRESET = 'decuong_upload'; // Upload preset vừa tạo
+
+// Upload file lên Cloudinary
+async function uploadToCloudinary(file) {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+    
+    const response = await fetch(
+        `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/auto/upload`,
+        {
+            method: 'POST',
+            body: formData
+        }
+    );
+    
+    if (!response.ok) {
+        throw new Error('Upload failed');
+    }
+    
+    const data = await response.json();
+    return data.secure_url;
+}
+
 // Xử lý thêm đề cương
 async function handleAddOutline(e) {
     e.preventDefault();
@@ -400,24 +426,13 @@ async function handleAddOutline(e) {
     const formData = new FormData(e.target);
     const fileName = formData.get('fileName');
     
-    showToast('📤 Đang upload file...', 'info');
+    showToast('📤 Đang upload file lên Cloudinary...', 'info');
     
     try {
-        let filePath = `docs/${fileName}`;
+        // Upload file lên Cloudinary
+        const fileUrl = await uploadToCloudinary(selectedFile);
         
-        // Upload file lên Firebase Storage nếu có
-        if (typeof storage !== 'undefined' && storage) {
-            const storageRef = storage.ref();
-            const fileRef = storageRef.child(`outlines/${fileName}`);
-            
-            // Upload file
-            await fileRef.put(selectedFile);
-            
-            // Lấy download URL
-            filePath = await fileRef.getDownloadURL();
-            
-            console.log('✅ Đã upload file lên Firebase Storage:', filePath);
-        }
+        console.log('✅ Đã upload file lên Cloudinary:', fileUrl);
         
         const newOutline = {
             id: outlines.length > 0 ? Math.max(...outlines.map(o => o.id)) + 1 : 1,
@@ -425,7 +440,7 @@ async function handleAddOutline(e) {
             grade: formData.get('grade'),
             description: formData.get('description'),
             fileName: fileName,
-            filePath: filePath,
+            filePath: fileUrl,
             fileType: formData.get('fileType'),
             icon: formData.get('icon') || '📚'
         };
