@@ -105,7 +105,7 @@ function createOutlineCard(outline) {
                 <span class="file-type ${outline.fileType}">${outline.fileType.toUpperCase()}</span>
                 <span>${outline.fileName}</span>
             </div>
-            <a href="${outline.filePath}" class="download-btn" download="${outline.fileName}" onclick="event.stopPropagation()">📥 Tải xuống</a>
+            <a href="${createDownloadURL(outline.filePath)}" class="download-btn" download="${outline.fileName}" onclick="event.stopPropagation()">📥 Tải xuống</a>
         </div>
     `;
 }
@@ -123,11 +123,29 @@ function addCardClickEvents() {
     });
 }
 
+// Hàm tạo URL download từ Cloudinary
+function createDownloadURL(url) {
+    // Nếu URL chưa có fl_attachment, thêm vào
+    if (url.includes('res.cloudinary.com') && !url.includes('fl_attachment')) {
+        return url.replace(
+            /(.*\/upload\/)(.*)/, 
+            '$1fl_attachment/$2'
+        );
+    }
+    return url;
+}
+
 // Hàm tải file
 function downloadFile(filePath, fileName) {
+    console.log('📥 Downloading:', fileName, 'from', filePath);
+    
+    const downloadURL = createDownloadURL(filePath);
+    console.log('🔗 Download URL:', downloadURL);
+    
     const link = document.createElement('a');
-    link.href = filePath;
+    link.href = downloadURL;
     link.download = fileName;
+    link.setAttribute('target', '_blank'); // Mở tab mới nếu cần
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

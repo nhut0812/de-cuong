@@ -390,18 +390,43 @@ function renderTable(filteredOutlines = null) {
 
 // Cấu hình Cloudinary (Miễn phí - không cần Firebase Storage)
 const CLOUDINARY_CLOUD_NAME = 'dydd3mjeo'; // Cloud name của bạn
-const CLOUDINARY_UPLOAD_PRESET = 'decuong_upload'; // Upload preset đã tạo
+const CLOUDINARY_UPLOAD_PRESET = 'decuong_raw'; // Upload preset cho RAW files
+
+// Hàm tạo URL download từ Cloudinary
+function createDownloadURL(cloudinaryURL) {
+    // Thêm fl_attachment để force download thay vì preview
+    if (cloudinaryURL.includes('res.cloudinary.com')) {
+        // Thay /upload/ thành /upload/fl_attachment/
+        return cloudinaryURL.replace(
+            /(.*\/upload\/)(.*)/, 
+            '$1fl_attachment/$2'
+        );
+    }
+    return cloudinaryURL;
+}
 
 // Upload file lên Cloudinary
 async function uploadToCloudinary(file) {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-    formData.append('public_id', file.name.replace(/\.[^/.]+$/, "")); // Giữ tên file gốc
-    formData.append('resource_type', 'auto');
+    
+    // Tạo public_id duy nhất để tránh conflict
+    const timestamp = Date.now();
+    const cleanName = file.name.replace(/\.[^/.]+$/, "").replace(/[^a-zA-Z0-9-_]/g, '_');
+    formData.append('public_id', `${cleanName}_${timestamp}`);
+    
+    // Luôn dùng 'raw' cho tất cả file để đảm bảo download được
+    formData.append('resource_type', 'raw');
+    
+    console.log('📤 Uploading to Cloudinary...', {
+        fileName: file.name,
+        size: file.size,
+        type: file.type
+    });
     
     const response = await fetch(
-        `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/auto/upload`,
+        `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/raw/upload`,
         {
             method: 'POST',
             body: formData
@@ -410,12 +435,19 @@ async function uploadToCloudinary(file) {
     
     if (!response.ok) {
         const errorData = await response.json();
-        console.error('❌ Cloudinary error:', errorData);
+        console.error('❌ Cloudinary upload error:', errorData);
         throw new Error(errorData.error?.message || 'Upload failed');
     }
     
     const data = await response.json();
-    return data.secure_url;
+    console.log('✅ Cloudinary upload success:', {
+        url: data.secure_url,
+        publicId: data.public_id,
+        resourceType: data.resource_type
+    });
+    
+    // Trả về URL đã có fl_attachment để download
+    return createDownloadURL(data.secure_url);
 }
 
 // Xử lý thêm đề cương
