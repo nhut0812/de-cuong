@@ -23,7 +23,13 @@ body {
     color: var(--text-color);
     line-height: 1.6;
     min-height: 100vh;
-    padding: 20px;
+    padding: 10px; /* Giảm padding cho mobile */
+}
+
+@media (min-width: 768px) {
+    body {
+        padding: 20px;
+    }
 }
 
 .container {
@@ -38,15 +44,30 @@ body {
 header {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
-    padding: 40px 30px;
+    padding: 20px 15px; /* Mobile-first: padding nhỏ hơn */
     text-align: center;
+}
+
+@media (min-width: 768px) {
+    header {
+        padding: 40px 30px;
+    }
 }
 
 .header-top {
     display: flex;
-    justify-content: space-between;
+    flex-direction: column; /* Mobile: stack vertical */
+    justify-content: center;
     align-items: center;
-    gap: 20px;
+    gap: 15px;
+}
+
+@media (min-width: 768px) {
+    .header-top {
+        flex-direction: row;
+        justify-content: space-between;
+        gap: 20px;
+    }
 }
 
 .header-top > div {
@@ -54,18 +75,34 @@ header {
 }
 
 header h1 {
-    font-size: 2.5rem;
-    margin-bottom: 10px;
+    font-size: 1.5rem; /* Mobile-first: nhỏ hơn */
+    margin-bottom: 8px;
     font-weight: 700;
 }
 
-.admin-btn {
-    background: rgba(255, 255, 255, 0.2);
-    color: white;
-    padding: 12px 24px;
+@media (min-width: 768px) {
+    header h1 {
+        font-size: 2.5rem;
+        margin0px 20px; /* Mobile: padding nhỏ hơn */
     border-radius: 50px;
     text-decoration: none;
     font-weight: 600;
+    font-size: 0.9rem; /* Mobile: chữ nhỏ hơn */
+    transition: all 0.3s ease;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+    backdrop-filter: blur(10px);
+}
+
+@media (min-width: 768px) {
+    .admin-btn {
+        padding: 12px 24px;
+        font-size: 1rem;
+        gap: 8px;
+    }
     transition: all 0.3s ease;
     border: 2px solid rgba(255, 255, 255, 0.3);
     display: inline-flex;
@@ -83,25 +120,44 @@ header h1 {
 }
 
 .subtitle {
-    font-size: 1.1rem;
+    font-size: 0.95rem; /* Mobile-first */
     opacity: 0.95;
     font-weight: 300;
 }
 
+@media (min-width: 768px) {
+    .subtitle {
+        font-size: 1.1rem;
+    }
+}
+
 .search-box {
-    padding: 30px 30px 20px;
+    padding: 20px 15px 15px; /* Mobile-first */
     background: var(--background-color);
+}
+
+@media (min-width: 768px) {
+    .search-box {
+        padding: 30px 30px 20px;
+    }
 }
 
 #searchInput {
     width: 100%;
-    padding: 15px 20px;
-    font-size: 1rem;
+    padding: 12px 16px; /* Mobile-first */
+    font-size: 0.95rem;
     border: 2px solid var(--border-color);
     border-radius: 50px;
     outline: none;
     transition: all 0.3s ease;
     background: white;
+}
+
+@media (min-width: 768px) {
+    #searchInput {
+        padding: 15px 20px;
+        font-size: 1rem;
+    }
 }
 
 #searchInput:focus {
@@ -110,33 +166,61 @@ header h1 {
 }
 
 .filter-section {
-    padding: 10px 30px 20px;
+    padding: 10px 15px 15px; /* Mobile-first */
     background: var(--background-color);
+}
+
+@media (min-width: 768px) {
+    .filter-section {
+        padding: 10px 30px 20px;
+    }
 }
 
 .filter-label {
     font-weight: 600;
     color: var(--secondary-color);
-    margin-bottom: 10px;
-    font-size: 0.95rem;
+    margin-bottom: 8px;
+    font-size: 0.85rem; /* Mobile-first */
+}
+
+@media (min-width: 768px) {
+    .filter-label {
+        margin-bottom: 10px;
+        font-size: 0.95rem;
+    }
 }
 
 .filter-buttons {
     display: flex;
-    gap: 10px;
+    gap: 8px; /* Mobile-first */
     flex-wrap: wrap;
 }
 
+@media (min-width: 768px) {
+    .filter-buttons {
+        gap: 10px;
+    }
+}
+
 .filter-btn {
-    padding: 8px 18px;
+    padding: 6px 14px; /* Mobile-first */
     border: 2px solid var(--border-color);
     background: white;
     border-radius: 20px;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
     color: var(--text-color);
+    min-height: 44px; /* Touch target */
+}
+
+@media (min-width: 768px) {
+    .filter-btn {
+        padding: 8px 18px;
+        font-size: 0.9rem;
+        min-height: auto;
+    }
 }
 
 .filter-btn:hover {
@@ -152,37 +236,72 @@ header h1 {
 }
 
 .stats {
-    padding: 15px 30px;
+    padding: 12px 15px; /* Mobile-first */
     background: var(--background-color);
     border-bottom: 1px solid var(--border-color);
     color: var(--text-light);
-    font-size: 0.95rem;
+    font-size: 0.85rem;
+}
+
+@media (min-width: 768px) {
+    .stats {
+        padding: 15px 30px;
+        font-size: 0.95rem;
+    }
 }
 
 .stats strong {
     color: var(--primary-color);
-    font-size: 1.1rem;
+    font-size: 1rem; /* Mobile-first */
+}
+
+@media (min-width: 768px) {
+    .stats strong {
+        font-size: 1.1rem;
+    }
 }
 
 .outlines-grid {
-    padding: 30px;
+    padding: 15px; /* Mobile-first */
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 20px;
+    grid-template-columns: 1fr; /* Mobile: single column */
+    gap: 15px;
     min-height: 300px;
     background: var(--background-color);
 }
 
+@media (min-width: 480px) {
+    .outlines-grid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    }
+}
+
+@media (min-width: 768px) {
+    .outlines-grid {
+        padding: 30px;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 20px;
+    }
+}
+
 .outline-card {
     background: var(--card-background);
-    border-radius: 12px;
-    padding: 25px;
+    border-radius: 10px; /* Mobile-first */
+    padding: 16px;
     border: 2px solid var(--border-color);
     transition: all 0.3s ease;
     cursor: pointer;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
+}
+
+@media (min-width: 768px) {
+    .outline-card {
+        border-radius: 12px;
+        padding: 25px;
+        gap: 12px;
+    }
 }
 
 .outline-card:hover {
@@ -193,15 +312,28 @@ header h1 {
 
 .outline-card h3 {
     color: var(--secondary-color);
-    font-size: 1.3rem;
+    font-size: 1.1rem; /* Mobile-first */
     margin-bottom: 5px;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
+}
+
+@media (min-width: 768px) {
+    .outline-card h3 {
+        font-size: 1.3rem;
+        gap: 10px;
+    }
 }
 
 .outline-card .subject-icon {
-    font-size: 1.5rem;
+    font-size: 1.2rem; /* Mobile-first */
+}
+
+@media (min-width: 768px) {
+    .outline-card .subject-icon {
+        font-size: 1.5rem;
+    }
 }
 
 .outline-card .grade-tag {
@@ -223,12 +355,29 @@ header h1 {
 
 .outline-card .file-info {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding-top: 12px;
+    flex-direction: column; /* Mobile: stack */
+    gap: 8px;
+    align-items: flex-start;
+    padding-top: 10px;
     border-top: 1px solid var(--border-color);
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     color: var(--text-light);
+}
+
+@media (min-width: 480px) {
+    .outline-card .file-info {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0;
+    }
+}
+
+@media (min-width: 768px) {
+    .outline-card .file-info {
+        padding-top: 12px;
+        font-size: 0.85rem;
+    }
 }
 
 .file-type {
@@ -260,15 +409,30 @@ header h1 {
 .download-btn {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
+    justify-content: center;
+    gap: 6px;
     background: var(--primary-color);
     color: white;
-    padding: 10px 20px;
+    padding: 12px 16px; /* Mobile-first */
     border-radius: 8px;
     text-decoration: none;
     transition: all 0.3s ease;
     font-weight: 500;
-    margin-top: 10px;
+    margin-top: 8px;
+    min-height: 44px; /* Touch target */
+    width: 100%; /* Mobile: full width */
+    font-size: 0.9rem;
+}
+
+@media (min-width: 768px) {
+    .download-btn {
+        padding: 10px 20px;
+        gap: 8px;
+        margin-top: 10px;
+        min-height: auto;
+        width: auto;
+        font-size: 1rem;
+    }
 }
 
 .download-btn:hover {
@@ -316,9 +480,16 @@ header h1 {
 footer {
     background: var(--secondary-color);
     color: white;
-    padding: 25px 30px;
+    padding: 20px 15px; /* Mobile-first */
     text-align: center;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
+}
+
+@media (min-width: 768px) {
+    footer {
+        padding: 25px 30px;
+        font-size: 0.9rem;
+    }
 }
 
 footer p {
