@@ -1,6 +1,162 @@
 # 📚 Website Đề Cương Ôn Tập
 
-Website tĩnh để phát hành và chia sẻ đề cương ôn tập cho học sinh tiểu học. Website hoạt động hoàn toàn trên GitHub Pages, hỗ trợ Firebase để đồng bộ dữ liệu tự động.
+Website tĩnh để phát hành và chia sẻ đề cương ôn tập cho học sinh tiểu học. File được lưu trực tiếp trên GitHub, đồng bộ tự động với Firebase.
+
+## ✨ Tính năng
+
+### Website công khai (index.html)
+- 📱 **Responsive Design** - Tương thích mọi thiết bị
+- 🔍 **Tìm kiếm nhanh** - Tìm đề cương theo tên môn học
+- 📥 **Tải xuống** - Download file PDF/DOCX từ GitHub
+- 🎨 **Giao diện đẹp** - Thiết kế hiện đại, dễ sử dụng
+- 🌐 **Public Access** - Mọi người đều truy cập được
+
+### Trang quản trị (admin.html)
+- 🔐 **Đăng nhập an toàn** - Xác thực qua Firebase
+- ➕ **Upload tự động** - File tự động lên GitHub qua API
+- ✏️ **Sửa đề cương** - Chỉnh sửa thông tin trực tiếp
+- 🗑️ **Xóa tự động** - Xóa đề cương + file trên GitHub
+- 📊 **Thống kê** - Tổng quan số lượng đề cương
+- 🔍 **Tìm kiếm** - Tìm nhanh trong bảng quản lý
+- 🔥 **Firebase Sync** - Đồng bộ realtime giữa các máy
+
+### Upload File
+- 📤 **GitHub API** - Upload trực tiếp lên GitHub
+- 🌐 **Public URL** - File công khai qua raw.githubusercontent.com
+- 🔤 **Không dấu** - Tự động chuyển tiếng Việt không dấu
+- 🔢 **Tự động đánh số** - Tránh trùng tên file
+- 🗑️ **Auto Delete** - Xóa file khi xóa đề cương
+
+## 🚀 Cài đặt
+
+### Bước 1: Clone Repository
+```bash
+git clone https://github.com/nhut0812/de-cuong.git
+cd de-cuong
+```
+
+### Bước 2: Cấu hình GitHub (Bắt buộc)
+1. Tạo GitHub Personal Access Token
+2. Tạo file `js/github-config.js`:
+```javascript
+const GITHUB_CONFIG = {
+    token: 'ghp_YOUR_TOKEN_HERE',
+    owner: 'nhut0812',
+    repo: 'de-cuong',
+    branch: 'main',
+    docsFolder: 'docs/'
+};
+```
+3. File này đã được thêm vào `.gitignore` (không lo bị lộ)
+
+Chi tiết: Xem [GITHUB-SETUP.md](GITHUB-SETUP.md)
+
+### Bước 3: Cấu hình Firebase (Tùy chọn)
+Firebase giúp đồng bộ dữ liệu tự động giữa các máy.
+
+Chi tiết: Xem [FIREBASE-SETUP.md](FIREBASE-SETUP.md)
+
+### Bước 4: Chạy Website
+Mở file `index.html` bằng Live Server hoặc host trên GitHub Pages.
+
+## 📁 Cấu trúc Project
+
+```
+de-cuong/
+├── index.html              # Trang chủ (public)
+├── admin.html              # Trang quản trị
+├── login.html              # Trang đăng nhập
+├── README.md               # File này
+├── FIREBASE-SETUP.md       # Hướng dẫn Firebase
+├── GITHUB-SETUP.md         # Hướng dẫn GitHub Token
+├── .gitignore              # Bảo vệ token
+├── css/
+│   ├── styles.css          # CSS trang chủ
+│   └── admin.css           # CSS admin
+├── js/
+│   ├── app.js              # Logic trang chủ
+│   ├── admin.js            # Logic admin + GitHub upload
+│   ├── firebase-config.js  # Config Firebase
+│   └── github-config.js    # Config GitHub (KHÔNG COMMIT!)
+└── docs/                   # Chứa file PDF/DOCX
+    └── README.md
+```
+
+## 🔐 Đăng nhập Admin
+
+**Email mặc định:** `admin@decuong.com`  
+**Password mặc định:** `admin123456`
+
+Tài khoản được tạo tự động khi lần đầu truy cập.
+
+## 💡 Cách sử dụng
+
+### Upload đề cương mới
+1. Đăng nhập trang admin
+2. Tab "Thêm đề cương"
+3. Chọn file PDF/DOCX
+4. Điền thông tin (môn học, lớp, mô tả)
+5. Click "Thêm"
+6. File tự động:
+   - Upload lên GitHub
+   - Commit vào folder `docs/`
+   - Tạo URL public
+   - Lưu vào Firebase
+
+### Xóa đề cương
+1. Tab "Quản lý đề cương"
+2. Click nút "Xóa"
+3. Xác nhận
+4. Hệ thống tự động:
+   - Xóa file trên GitHub
+   - Xóa khỏi database
+   - Cập nhật giao diện
+
+## 🌐 Deploy
+
+### GitHub Pages (Khuyến nghị)
+```bash
+# Push code lên GitHub
+git add .
+git commit -m "Update"
+git push origin main
+
+# Vào Settings → Pages
+# Source: Deploy from branch
+# Branch: main
+# Folder: / (root)
+```
+
+Website sẽ có tại: `https://nhut0812.github.io/de-cuong`
+
+## 🔧 Troubleshooting
+
+### Lỗi "GitHub upload failed"
+- Kiểm tra token có đúng không
+- Token phải có quyền `repo`
+- Check file `js/github-config.js` tồn tại
+
+### Lỗi "File already exists"
+- Hệ thống tự động thêm (1), (2)... vào tên
+- Nếu vẫn lỗi, xóa file cũ trên GitHub trước
+
+### File không tải được
+- Đợi vài giây sau khi upload (GitHub cần xử lý)
+- Check link có đúng format: `raw.githubusercontent.com`
+- Đảm bảo repo là public
+
+## 📝 License
+
+MIT License - Tự do sử dụng và chỉnh sửa
+
+## 👨‍💻 Liên hệ
+
+- GitHub: [@nhut0812](https://github.com/nhut0812)
+- Repository: [de-cuong](https://github.com/nhut0812/de-cuong)
+
+---
+
+Made with ❤️ for education
 
 ## ✨ Tính năng
 

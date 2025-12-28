@@ -388,66 +388,160 @@ function renderTable(filteredOutlines = null) {
     `).join('');
 }
 
-// Cấu hình Cloudinary (Miễn phí - không cần Firebase Storage)
-const CLOUDINARY_CLOUD_NAME = 'dydd3mjeo'; // Cloud name của bạn
-const CLOUDINARY_UPLOAD_PRESET = 'decuong_raw'; // Upload preset cho RAW files
-
-// Hàm tạo URL download từ Cloudinary
-function createDownloadURL(cloudinaryURL) {
-    // Thêm fl_attachment để force download thay vì preview
-    if (cloudinaryURL.includes('res.cloudinary.com')) {
-        // Thay /upload/ thành /upload/fl_attachment/
-        return cloudinaryURL.replace(
-            /(.*\/upload\/)(.*)/, 
-            '$1fl_attachment/$2'
-        );
-    }
-    return cloudinaryURL;
+// Chuyển tiếng Việt có dấu sang không dấu
+function removeVietnameseTones(str) {
+    str = str.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, "a");
+    str = str.replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g, "e");
+    str = str.replace(/ì|í|ị|ỉ|ĩ/g, "i");
+    str = str.replace(/ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ/g, "o");
+    str = str.replace(/ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ/g, "u");
+    str = str.replace(/ỳ|ý|ỵ|ỷ|ỹ/g, "y");
+    str = str.replace(/đ/g, "d");
+    str = str.replace(/À|Á|Ạ|Ả|Ã|Â|Ầ|Ấ|Ậ|Ẩ|Ẫ|Ă|Ằ|Ắ|Ặ|Ẳ|Ẵ/g, "A");
+    str = str.replace(/È|É|Ẹ|Ẻ|Ẽ|Ê|Ề|Ế|Ệ|Ể|Ễ/g, "E");
+    str = str.replace(/Ì|Í|Ị|Ỉ|Ĩ/g, "I");
+    str = str.replace(/Ò|Ó|Ọ|Ỏ|Õ|Ô|Ồ|Ố|Ộ|Ổ|Ỗ|Ơ|Ờ|Ớ|Ợ|Ở|Ỡ/g, "O");
+    str = str.replace(/Ù|Ú|Ụ|Ủ|Ũ|Ư|Ừ|Ứ|Ự|Ử|Ữ/g, "U");
+    str = str.replace(/Ỳ|Ý|Ỵ|Ỷ|Ỹ/g, "Y");
+    str = str.replace(/Đ/g, "D");
+    // Loại bỏ ký tự đặc biệt, chỉ giữ chữ, số, dấu chấm, gạch ngang
+    str = str.replace(/[^a-zA-Z0-9.-]/g, "_");
+    // Loại bỏ dấu gạch dưới liên tiếp
+    str = str.replace(/_+/g, "_");
+    // Loại bỏ dấu gạch dưới đầu/cuối
+    str = str.replace(/^_|_$/g, "");
+    return str;
 }
 
-// Upload file lên Cloudinary
-async function uploadToCloudinary(file) {
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-    
-    // Tạo public_id duy nhất để tránh conflict
-    const timestamp = Date.now();
-    const cleanName = file.name.replace(/\.[^/.]+$/, "").replace(/[^a-zA-Z0-9-_]/g, '_');
-    formData.append('public_id', `${cleanName}_${timestamp}`);
-    
-    // Luôn dùng 'raw' cho tất cả file để đảm bảo download được
-    formData.append('resource_type', 'raw');
-    
-    console.log('📤 Uploading to Cloudinary...', {
+// Upload file lên GitHub qua API
+async function uploadToGitHub(file) {
+    console.log('📤 Uploading to GitHub...', {
         fileName: file.name,
         size: file.size,
         type: file.type
     });
     
-    const response = await fetch(
-        `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/raw/upload`,
-        {
-            method: 'POST',
-            body: formData
+    // Đọc file thành base64
+    const reader = new FileReader();
+    const fileContent = await new Promise((resolve, reject) => {
+        reader.onload = () => resolve(reader.result.split(',')[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+    
+    // Chuyển tên file tiếng Việt sang không dấu
+    let fileName = removeVietnameseTones(file.name);
+    let filePath = `${GITHUB_CONFIG.docsFolder}${fileName}`;
+    
+    // Check nếu file đã tồn tại, thêm số vào tên
+    let counter = 1;
+    let checkUrl = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${filePath}`;
+    
+    while (true) {
+        const checkResponse = await fetch(checkUrl, {
+            headers: { 'Authorization': `token ${GITHUB_CONFIG.token}` }
+        });
+        
+        if (checkResponse.status === 404) {
+            // File chưa tồn tại, OK để upload
+            break;
+        } else if (checkResponse.ok) {
+            // File đã tồn tại, thêm số vào tên
+            const nameParts = file.name.split('.');
+            const ext = nameParts.pop();
+            const baseName = nameParts.join('.');
+            const cleanBaseName = removeVietnameseTones(baseName);
+            fileName = `${cleanBaseName}_(${counter}).${ext}`;
+            filePath = `${GITHUB_CONFIG.docsFolder}${fileName}`;
+            checkUrl = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${filePath}`;
+            counter++;
+        } else {
+            throw new Error('Failed to check file existence');
         }
-    );
+    }
+    
+    console.log('✅ Final file name:', fileName);
+    
+    // Upload lên GitHub
+    const url = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${filePath}`;
+    
+    const response = await fetch(url, {
+        method: 'PUT',
+        headers: {
+            'Authorization': `token ${GITHUB_CONFIG.token}`,
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            message: `Upload file: ${file.name}`,
+            content: fileContent,
+            branch: GITHUB_CONFIG.branch
+        })
+    });
     
     if (!response.ok) {
         const errorData = await response.json();
-        console.error('❌ Cloudinary upload error:', errorData);
-        throw new Error(errorData.error?.message || 'Upload failed');
+        console.error('❌ GitHub upload error:', errorData);
+        throw new Error(errorData.message || 'GitHub upload failed');
     }
     
     const data = await response.json();
-    console.log('✅ Cloudinary upload success:', {
-        url: data.secure_url,
-        publicId: data.public_id,
-        resourceType: data.resource_type
-    });
+    console.log('✅ GitHub upload success:', data);
     
-    // Trả về URL đã có fl_attachment để download
-    return createDownloadURL(data.secure_url);
+    // Trả về URL public từ raw.githubusercontent.com với tên file đã encode
+    const encodedFileName = encodeURIComponent(fileName);
+    const publicURL = `https://raw.githubusercontent.com/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/${GITHUB_CONFIG.branch}/${GITHUB_CONFIG.docsFolder}${encodedFileName}`;
+    return publicURL;
+}
+
+// Xóa file từ GitHub
+async function deleteFromGitHub(fileURL) {
+    try {
+        // Trích xuất tên file từ URL
+        const urlParts = fileURL.split('/');
+        const fileName = decodeURIComponent(urlParts[urlParts.length - 1]);
+        const filePath = `${GITHUB_CONFIG.docsFolder}${fileName}`;
+        
+        console.log('🗑️ Deleting from GitHub:', fileName);
+        
+        // Lấy SHA của file (cần thiết để xóa)
+        const getUrl = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${filePath}`;
+        const getResponse = await fetch(getUrl, {
+            headers: { 'Authorization': `token ${GITHUB_CONFIG.token}` }
+        });
+        
+        if (!getResponse.ok) {
+            console.warn('⚠️ File không tồn tại trên GitHub, bỏ qua');
+            return;
+        }
+        
+        const fileData = await getResponse.json();
+        
+        // Xóa file
+        const deleteUrl = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${filePath}`;
+        const deleteResponse = await fetch(deleteUrl, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `token ${GITHUB_CONFIG.token}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                message: `Delete file: ${fileName}`,
+                sha: fileData.sha,
+                branch: GITHUB_CONFIG.branch
+            })
+        });
+        
+        if (!deleteResponse.ok) {
+            const errorData = await deleteResponse.json();
+            console.error('❌ GitHub delete error:', errorData);
+            throw new Error(errorData.message || 'Delete failed');
+        }
+        
+        console.log('✅ Deleted from GitHub successfully');
+    } catch (error) {
+        console.error('❌ Error deleting from GitHub:', error);
+        // Không throw error để không block việc xóa đề cương
+    }
 }
 
 // Xử lý thêm đề cương
@@ -462,13 +556,13 @@ async function handleAddOutline(e) {
     const formData = new FormData(e.target);
     const fileName = formData.get('fileName');
     
-    showToast('📤 Đang upload file lên Cloudinary...', 'info');
+    showToast('📤 Đang upload file lên GitHub...', 'info');
     
     try {
-        // Upload file lên Cloudinary
-        const fileUrl = await uploadToCloudinary(selectedFile);
+        // Upload file lên GitHub
+        const fileUrl = await uploadToGitHub(selectedFile);
         
-        console.log('✅ Đã upload file lên Cloudinary:', fileUrl);
+        console.log('✅ Đã upload file lên GitHub:', fileUrl);
         
         const newOutline = {
             id: outlines.length > 0 ? Math.max(...outlines.map(o => o.id)) + 1 : 1,
@@ -563,9 +657,22 @@ function handleEditOutline(e) {
 }
 
 // Xóa đề cương
-function deleteOutline(id) {
+// Xóa đề cương
+async function deleteOutline(id) {
     const outline = outlines.find(o => o.id === id);
     if (!outline) return;
+    
+    if (!confirm(`Bạn có chắc muốn xóa đề cương "${outline.subject}"?\n\nFile trên GitHub cũng sẽ bị xóa!`)) {
+        return;
+    }
+    
+    // Xóa file trên GitHub nếu có
+    if (outline.filePath && outline.filePath.includes('githubusercontent.com')) {
+        showToast('🗑️ Đang xóa file trên GitHub...', 'info');
+        await deleteFromGitHub(outline.filePath);
+    }
+    
+    // Xóa đề cương khỏi danh sách
     outlines = outlines.filter(o => o.id !== id);
     
     if (firebaseEnabled) {
@@ -575,15 +682,10 @@ function deleteOutline(id) {
     }
     
     updateDashboard();
-
-    outlines = outlines.filter(o => o.id !== id);
-    saveToLocalStorage();
-    
-    updateDashboard();
     renderTable();
     updateJSONPreview();
     
-    showToast('🗑️ Đã xóa đề cương!', 'success');
+    showToast('🗑️ Đã xóa đề cương và file!', 'success');
 }
 
 // Tìm kiếm

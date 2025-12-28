@@ -1,5 +1,8 @@
 # .gitignore cho website đề cương
 
+# GitHub Token - KHÔNG BAO GIỜ COMMIT!
+js/github-config.js
+
 # macOS
 .DS_Store
 .AppleDouble
