@@ -86,7 +86,16 @@ body {
 }
 
 @media (min-width: 768px) {
-    .hea-direction: column; /* Mobile: stack sidebar xuống dưới */
+    .header-actions {
+        gap: 10px;
+        justify-content: flex-end;
+    }
+}
+
+/* Layout */
+.admin-content {
+    display: flex;
+    flex-direction: column; /* Mobile: stack sidebar xuống dưới */
     flex: 1;
     max-width: 1400px;
     width: 100%;
@@ -115,7 +124,24 @@ body {
         border-bottom: none;
         padding: 20px 0;
     }
-}2px 20px; /* Mobile: padding nhỏ hơn */
+}
+
+.sidebar nav {
+    display: flex;
+    flex-direction: row; /* Mobile: horizontal scroll */
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+@media (min-width: 768px) {
+    .sidebar nav {
+        flex-direction: column;
+        overflow-x: visible;
+    }
+}
+
+.nav-item {
+    padding: 12px 20px; /* Mobile: padding nhỏ hơn */
     color: var(--text);
     text-decoration: none;
     display: flex;
@@ -135,32 +161,6 @@ body {
         border-bottom: none;
         font-size: 1rem;
     }
-@media (min-width: 768px) {
-    .sidebar nav {
-        flex-direction: column;
-        overflow-x: visible;
-    }
-    width: 250px;
-    background: var(--surface);
-    border-right: 1px solid var(--border);
-    padding: 20px 0;
-}
-
-.sidebar nav {
-    display: flex;
-    flex-direction: column;
-}
-
-.nav-item {
-    padding: 15px 25px;
-    color: var(--text);
-    text-decoration: none;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    transition: all 0.3s ease;
-    border-left: 3px solid transparent;
-    font-weight: 500;
 }
 
 .nav-item:hover {
@@ -1067,7 +1067,6 @@ body {
         max-width: 400px;
         font-size: 1rem;
     }
-}
 }
 
 .toast.show {
